@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- Do not include the generator as a lib dependency -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Authors>VolocyNazad</Authors>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Copyright>Copyright © VolocyNazad</Copyright>
+    <Description>Source generator for automatic xaml design mode constructor generation.</Description>
+    <PackageTags>source-generator;constructor;xaml;design-mode</PackageTags>
+    <PackageId>XamlConstructor</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!--<PackageIcon>logo_128x128.png</PackageIcon>-->
+    <PackageProjectUrl>https://github.com/VolocyNazad/xaml-constructor</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageOutputPath>..\..\artifacts\</PackageOutputPath>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/VolocyNazad/xaml-constructor</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/VolocyNazad/xaml-constructor/blob/main/CHANGELOG.md</PackageReleaseNotes>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--<None Include="..\..\logo_128x128.png" Pack="true" PackagePath="" Visible="false" />-->
+    <None Include="..\..\README.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+  <ItemGroup>
+     <!--Package the generator and the code fixes in the analyzer directory of the nuget package--> 
+    <None Include="$(MSBuildThisFileDirectory)\..\XamlConstructor.Generator\bin\$(Configuration)\netstandard2.0\XamlConstructor.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)\..\XamlConstructor.CodeFixes\bin\$(Configuration)\netstandard2.0\XamlConstructor.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+</Project>

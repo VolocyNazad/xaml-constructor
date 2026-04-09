@@ -1,0 +1,28 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".globalconfig" />
+    <File Path="create-packages.ps1" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/XamlConstructor.Tests/XamlConstructor.Tests.csproj" Id="44463214-48bc-4cac-b991-9ba52c528281">
+      <Build Solution="Debug|Any CPU" Project="false" />
+    </Project>
+  </Folder>
+  <Project Path="src/XamlConstructor.CodeFixes/XamlConstructor.CodeFixes.csproj" />
+  <Project Path="src/XamlConstructor.Generator/XamlConstructor.Generator.csproj" />
+  <Project Path="src/XamlConstructor/XamlConstructor.csproj">
+    <BuildDependency Project="src/XamlConstructor.CodeFixes/XamlConstructor.CodeFixes.csproj" />
+    <BuildDependency Project="src/XamlConstructor.Generator/XamlConstructor.Generator.csproj" />
+  </Project>
+</Solution>
