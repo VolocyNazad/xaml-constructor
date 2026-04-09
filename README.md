@@ -5,7 +5,7 @@
 [![GitHub release](https://img.shields.io/github/release/VolocyNazad/XamlConstructor.svg?logo=github)](https://github.com/VolocyNazad/XamlConstructor/releases/latest)
 [![GitHub license](https://img.shields.io/github/license/VolocyNazad/XamlConstructor
 )](https://raw.githubusercontent.com/VolocyNazad/XamlConstructor/main/LICENSE)
-![ci.yml](https://github.com/VolocyNazad/XamlConstructor/workflows/.github/workflows/ci.yml/badge.svg)
+![ci.yml](https://github.com/VolocyNazad/xaml-constructor/workflows/.github/workflows/ci.yml/badge.svg)
 
 C# source generator that generates a constructor from readonly fields in a class or struct for xaml design mode.
 
