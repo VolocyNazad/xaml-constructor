@@ -8,6 +8,7 @@
     <File Path=".editorconfig" />
     <File Path=".github/workflows/ci.yml" />
     <File Path=".globalconfig" />
+    <File Path="CHANGELOG.md" />
     <File Path="create-packages.ps1" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
