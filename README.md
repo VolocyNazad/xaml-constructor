@@ -49,9 +49,9 @@ partial class MyClass
     [Obsolete("This constructor should only be used by XAML markup, and only in DesignMode.")]
     public MyClass()
     {
-        this._serviceProvider = null!
-        this._logger = null!
-        this._service = null!
+        this._serviceProvider = null!;
+        this._logger = null!;
+        this._service = null!;
     }
 }
 ```
