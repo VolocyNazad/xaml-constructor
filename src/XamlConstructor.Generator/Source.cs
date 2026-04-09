@@ -29,6 +29,6 @@ public static class Source
         /// }
         /// </example>
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-        public sealed class {{AttributeFullName}}() : Attribute;
+        internal sealed class {{AttributeFullName}}() : Attribute;
         """;
 }
