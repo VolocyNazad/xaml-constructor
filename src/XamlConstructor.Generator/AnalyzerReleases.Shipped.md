@@ -7,5 +7,5 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-XCONS01 | Usage | Warning | TypeWithoutPartialRule, [Documentation](https://github.com/VolocyNazad/XamlConstructor#XCONS01)
-XCONS02 | Usage | Error | ConstructorCreationFailedRule, [Documentation](https://github.com/VolocyNazad/XamlConstructor#XCONS02)
+XCONS01 | Usage | Warning | TypeWithoutPartialRule, [Documentation](https://github.com/VolocyNazad/xaml-constructor?tab=readme-ov-file#xcons01)
+XCONS02 | Usage | Error | ConstructorCreationFailedRule, [Documentation](https://github.com/VolocyNazad/xaml-constructor?tab=readme-ov-file#xcons02)
