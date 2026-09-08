@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using XamlConstructor.Generator.Extensions;
@@ -10,7 +9,12 @@ namespace XamlConstructor.Generator.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TypeWithoutPartialAnalyzer : DiagnosticAnalyzer
 {
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.TypeWithoutPartialRule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
+        DiagnosticDescriptors.TypeWithoutPartialRule,
+        DiagnosticDescriptors.NestedTypeNotSupportedRule,
+        DiagnosticDescriptors.TypeNameDoesNotEndWithViewModelRule,
+        DiagnosticDescriptors.ConflictingConstructorRule,
+        DiagnosticDescriptors.NoPrivateReadonlyFieldsRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -24,13 +28,43 @@ public sealed class TypeWithoutPartialAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeSymbol(SymbolAnalysisContext context)
     {
-        var symbol = (INamedTypeSymbol)context.Symbol;
+        INamedTypeSymbol symbol = (INamedTypeSymbol)context.Symbol;
 
-        if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax typeDeclarationSyntax
-            && symbol.HasAttribute(Source.AttributeFullName)
-            && !typeDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
+        if (symbol.DeclaringSyntaxReferences[0].GetSyntax(context.CancellationToken) is not TypeDeclarationSyntax typeDeclarationSyntax
+            || !symbol.HasAttribute(Source.AttributeFullName))
         {
-            var diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithoutPartialRule, typeDeclarationSyntax.Identifier.GetLocation());
+            return;
+        }
+
+        Location location = typeDeclarationSyntax.Identifier.GetLocation();
+
+        if (!TypeDeclarationAnalysis.IsPartial(typeDeclarationSyntax))
+        {
+            Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithoutPartialRule, location);
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        if (!TypeDeclarationAnalysis.HasViewModelSuffix(typeDeclarationSyntax))
+        {
+            Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeNameDoesNotEndWithViewModelRule, location);
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        if (TypeDeclarationAnalysis.IsNestedType(typeDeclarationSyntax))
+        {
+            Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.NestedTypeNotSupportedRule, location);
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        if (TypeDeclarationAnalysis.HasParameterlessConstructor(typeDeclarationSyntax))
+        {
+            Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.ConflictingConstructorRule, location);
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        if (!TypeDeclarationAnalysis.FindReadonlyFields(typeDeclarationSyntax).Any())
+        {
+            Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.NoPrivateReadonlyFieldsRule, location);
             context.ReportDiagnostic(diagnostic);
         }
     }

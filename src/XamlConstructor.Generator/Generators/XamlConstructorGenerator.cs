@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -28,22 +27,49 @@ public sealed class XamlConstructorGenerator : IIncrementalGenerator
             {
                 (TypeDeclarationSyntax typeDeclaration, Compilation _) = tuple;
 
-                if (!typeDeclaration.Modifiers.Any(SyntaxKind.PartialKeyword))
+                if (!TypeDeclarationAnalysis.IsPartial(typeDeclaration))
                 {
-                    var diagnostic = Diagnostic.Create(
-                        DiagnosticDescriptors.TypeWithoutPartialRule,
-                        typeDeclaration.GetLocation());
+                    Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithoutPartialRule, typeDeclaration.GetLocation());
                     context.ReportDiagnostic(diagnostic);
                     return;
                 }
 
-                string source = GenerateConstructor(typeDeclaration);
+                if (!TypeDeclarationAnalysis.HasViewModelSuffix(typeDeclaration))
+                {
+                    Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeNameDoesNotEndWithViewModelRule, typeDeclaration.GetLocation());
+                    context.ReportDiagnostic(diagnostic);
+                    return;
+                }
+
+                if (TypeDeclarationAnalysis.IsNestedType(typeDeclaration))
+                {
+                    Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.NestedTypeNotSupportedRule, typeDeclaration.GetLocation());
+                    context.ReportDiagnostic(diagnostic);
+                    return;
+                }
+
+                if (TypeDeclarationAnalysis.HasParameterlessConstructor(typeDeclaration))
+                {
+                    Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.ConflictingConstructorRule, typeDeclaration.GetLocation());
+                    context.ReportDiagnostic(diagnostic);
+                    return;
+                }
+
+                List<FieldDeclarationSyntax> readonlyFields = [.. TypeDeclarationAnalysis.FindReadonlyFields(typeDeclaration)];
+
+                if (readonlyFields.Count == 0)
+                {
+                    Diagnostic diagnostic = Diagnostic.Create(DiagnosticDescriptors.NoPrivateReadonlyFieldsRule, typeDeclaration.GetLocation());
+                    context.ReportDiagnostic(diagnostic);
+                }
+
+                string source = GenerateConstructor(typeDeclaration, readonlyFields);
                 string fileName = GenerateUniqueFileName(typeDeclaration);
                 context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
             }
             catch (Exception ex)
             {
-                var diagnostic = Diagnostic.Create(
+                Diagnostic diagnostic = Diagnostic.Create(
                     DiagnosticDescriptors.ConstructorCreationFailedRule,
                     tuple.TypeDeclaration.GetLocation(),
                     tuple.TypeDeclaration.Identifier.Text,
@@ -55,15 +81,14 @@ public sealed class XamlConstructorGenerator : IIncrementalGenerator
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        return node is TypeDeclarationSyntax { AttributeLists.Count: > 0 } typeDeclarationSyntax
-            && typeDeclarationSyntax.Identifier.Text.EndsWith("ViewModel");
+        return node is TypeDeclarationSyntax { AttributeLists.Count: > 0 };
     }
 
     private static string GenerateUniqueFileName(TypeDeclarationSyntax typeDeclaration)
     {
         string className = typeDeclaration.Identifier.Text;
 
-        // Добавляем generic параметры в имя файла если они есть
+        // Append generic type parameters to the file name, if any
         if (typeDeclaration.TypeParameterList != null)
         {
             IEnumerable<string> parameters = typeDeclaration.TypeParameterList.Parameters
@@ -75,13 +100,11 @@ public sealed class XamlConstructorGenerator : IIncrementalGenerator
         return $"{className}.XamlConstructor.g.cs";
     }
 
-    private static string GenerateConstructor(TypeDeclarationSyntax typeDeclaration)
+    private static string GenerateConstructor(TypeDeclarationSyntax typeDeclaration, List<FieldDeclarationSyntax> readonlyFields)
     {
         string className = typeDeclaration.Identifier.Text;
         string? namespaceName = GetNamespace(typeDeclaration);
         string typeDeclarationWithGenerics = GetTypeDeclarationWithGenerics(typeDeclaration);
-
-        List<FieldDeclarationSyntax> readonlyFields = FindReadonlyFields(typeDeclaration).ToList();
 
         string fieldInitializations = GenerateFieldInitializations(readonlyFields);
 
@@ -115,7 +138,9 @@ public sealed class XamlConstructorGenerator : IIncrementalGenerator
 
         TypeParameterListSyntax? typeParameterList = typeDeclaration.TypeParameterList;
         if (typeParameterList == null)
+        {
             return className;
+        }
 
         IEnumerable<string> parameters = typeParameterList.Parameters
             .Select(p => p.Identifier.Text);
@@ -124,20 +149,14 @@ public sealed class XamlConstructorGenerator : IIncrementalGenerator
         return $"{className}<{genericParams}>";
     }
 
-    private static IEnumerable<FieldDeclarationSyntax> FindReadonlyFields(TypeDeclarationSyntax typeDeclaration)
-    {
-        return typeDeclaration.Members
-            .OfType<FieldDeclarationSyntax>()
-            .Where(f => f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword)
-                && (f.Modifiers.Any(SyntaxKind.PrivateKeyword) || f.Modifiers.Any(SyntaxKind.ProtectedKeyword))
-                && !f.Declaration.Variables.Any(v => v.Initializer != null));
-    }
-
     private static string GenerateFieldInitializations(List<FieldDeclarationSyntax> fields)
     {
         const string indent = "        ";
 
-        if (fields.Count == 0) return $"{indent}// No readonly fields found";
+        if (fields.Count == 0)
+        {
+            return $"{indent}// No readonly fields found";
+        }
 
         StringBuilder stringBuilder = new();
 
@@ -160,7 +179,9 @@ public sealed class XamlConstructorGenerator : IIncrementalGenerator
         while (potentialNamespaceParent != null)
         {
             if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceDeclaration)
+            {
                 return namespaceDeclaration.Name.ToString();
+            }
 
             potentialNamespaceParent = potentialNamespaceParent.Parent;
         }
