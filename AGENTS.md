@@ -9,6 +9,8 @@ explicitly to the user and get confirmation before adding it.
 
 If a change affects the folder structure or the tech stack (a new/removed project, a new dependency, a version bump worth recording, a new convention), update this file accordingly as part of the same change - don't leave it to a later pass.
 
+Keep `CHANGELOG.md` up to date, following [Keep a Changelog](https://keepachangelog.com/) format. Add an entry under an `## [Unreleased]` heading (grouped into `Added`/`Changed`/`Fixed`/`Removed` as needed) as part of the same change that introduces it - don't leave it to a later pass, and don't wait to be asked. At release time, rename `[Unreleased]` to the version being tagged (matching the same version used in `AnalyzerReleases.Shipped.md` and the git tag) and start a fresh empty `[Unreleased]` heading above it.
+
 Before changing existing tests or writing new ones, ask the user first – confirm what should be covered and how (or that the change is trivial enough not to need it) rather than deciding unilaterally.
 
 Commit messages follow Conventional Commits (`<type>(<scope>): <description>`, e.g. `feat(manifest): ...`, `fix(...): ...`, `docs(agents): ...`, `test(...): ...`, `chore(...): ...`, `refactor(...): ...`) - scope optional but preferred when it clarifies what changed.
