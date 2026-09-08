@@ -2,10 +2,10 @@
 
 [![NuGet](https://img.shields.io/nuget/vpre/XamlConstructor?logo=nuget
 )](https://www.nuget.org/packages/XamlConstructor/)
-[![GitHub release](https://img.shields.io/github/release/VolocyNazad/XamlConstructor.svg?logo=github)](https://github.com/VolocyNazad/XamlConstructor/releases/latest)
-[![GitHub license](https://img.shields.io/github/license/VolocyNazad/XamlConstructor
-)](https://raw.githubusercontent.com/VolocyNazad/XamlConstructor/main/LICENSE)
-![ci.yml](https://github.com/VolocyNazad/xaml-constructor/workflows/.github/workflows/ci.yml/badge.svg)
+[![GitHub release](https://img.shields.io/github/release/VolocyNazad/toolkit.xaml-constructor.svg?logo=github)](https://github.com/VolocyNazad/toolkit.xaml-constructor/releases/latest)
+[![GitHub license](https://img.shields.io/github/license/VolocyNazad/toolkit.xaml-constructor
+)](https://raw.githubusercontent.com/VolocyNazad/toolkit.xaml-constructor/main/LICENSE)
+![ci.yml](https://github.com/VolocyNazad/toolkit.xaml-constructor/workflows/.github/workflows/ci.yml/badge.svg)
 
 C# source generator that generates a constructor from readonly fields in a class or struct for xaml design mode.
 
@@ -65,3 +65,19 @@ The `XamlConstructor` attribute is used on a class that is not partial.
 ### XCONS02
 
 The `XamlConstructor` generation failed.
+
+### XCONS03
+
+The type decorated with `XamlConstructor` has no private or protected readonly fields without an initializer, so the generated constructor would be empty.
+
+### XCONS04
+
+The `XamlConstructor` attribute is used on a nested type. Nested types are not supported.
+
+### XCONS05
+
+The type decorated with `XamlConstructor` does not have a name ending with "ViewModel".
+
+### XCONS06
+
+The type decorated with `XamlConstructor` already declares a parameterless constructor.
