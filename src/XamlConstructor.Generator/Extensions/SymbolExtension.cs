@@ -17,19 +17,4 @@ internal static class SymbolExtension
 
         return symbol.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Name == attributeName);
     }
-
-    public static IEnumerable<INamedTypeSymbol> GetContainingTypes(this INamedTypeSymbol symbol)
-    {
-        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
-
-        if (symbol.ContainingType is not null)
-        {
-            foreach (INamedTypeSymbol item in symbol.ContainingType.GetContainingTypes())
-            {
-                yield return item;
-            }
-
-            yield return symbol.ContainingType;
-        }
-    }
 }
